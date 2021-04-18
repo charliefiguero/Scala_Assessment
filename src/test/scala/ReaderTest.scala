@@ -1,6 +1,9 @@
 import org.scalatest.FunSuite
+import Reader._
 
 class ReaderTest extends FunSuite {
+
+
   test("Reader.stringToDate") {
     assert(1 === 0)
   }
