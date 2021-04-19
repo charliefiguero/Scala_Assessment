@@ -1,11 +1,13 @@
 import Reader.stringToDate
 import dataTypes.FlightRecord
+import dataTypes.PassengerRecord
+import Services._
 
 package object Services {
-  //  def namesFromId(id: Int): (String, String) = {
-  ////    TODO: ensure that
-  //    passengerData.filter(record => record.passengerId == id).
-  //  }
+  def namesFromId(id: Int, passengerRecords: List[PassengerRecord]): (String, String) = {
+    val passenger = passengerRecords.filter(record => record.passengerId == id).head
+    (passenger.firstName, passenger.lastName)
+  }
 
   //  Question 1
   def numFlightsEachMonth(flightRecords: List[FlightRecord]): Map[Int, Int] = {
@@ -19,8 +21,6 @@ package object Services {
     val flightsPerPassenger = flightRecords.groupBy(_.passengerId)
     val lenFlightsPerPassenger = flightsPerPassenger.map(x => (x._1, x._2.length))
     lenFlightsPerPassenger.toList.sortBy(_._2)(Ordering[Int].reverse).take(100)
-
-    //    TODO: find and return names of these people
   }
 
   //  Question 3
@@ -28,8 +28,9 @@ package object Services {
     def longestStretchNotUK(customerFlightRecords: List[FlightRecord]): Int = {
       val orderedFlights = customerFlightRecords.sortBy(_.flightId)
 
+      val startAcc = if (orderedFlights.head.from == "uk") (0,0) else (1,1)
       // fold with accumulator (currentLength, maxLength)
-      val currentAndMaxStretch = orderedFlights.foldLeft((0, 0)) { (acc, flightRecord) =>
+      val currentAndMaxStretch = orderedFlights.foldLeft(startAcc) { (acc, flightRecord) =>
         val currentLength = acc._1
         val maxLength = acc._2
         val newLength = flightRecord.to match {
@@ -44,10 +45,12 @@ package object Services {
     }
 
     val flightsPerPassenger = flightRecords.groupBy(_.passengerId)
-    longestStretchNotUK(flightsPerPassenger(passengerId))
+    if (flightsPerPassenger.contains(passengerId)) longestStretchNotUK(flightsPerPassenger(passengerId))
+    else 0
   }
 
   //  Question 4
+  // TODO: optimse by only using passengers with > 2 flights
   def flownTogether(flightRecords: List[FlightRecord]): Map[Set[Int], Int] = {
     val flightPairs = flightRecords.groupBy(_.flightId).map(_._2.map(_.passengerId)).flatMap(_.combinations(2).map(_.toSet))
     val flightsTogether = flightPairs.groupMapReduce(identity)(_ => 1)((acc, b) => acc + b)
