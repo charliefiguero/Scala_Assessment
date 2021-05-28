@@ -1,4 +1,4 @@
-# Quantexa Assignment
+# Scala Assignment for an interview
 
 ## Requirements:
 
